@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Request xmlns="urn:oasis:names:tc:xacml:1.0:context"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Subject>
+    <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">premium</AttributeValue> 
+  </Subject>
+  <Resource>
+    <Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id"
+               DataType="http://www.w3.org/2001/XMLSchema#string">
+      <AttributeValue>urn:mvideo:Baztan.mp4</AttributeValue>
+    </Attribute>
+  </Resource>
+  <Action>
+    <Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id"
+               DataType="http://www.w3.org/2001/XMLSchema#string">
+      <AttributeValue>copy</AttributeValue>
+    </Attribute>
+  </Action>
+</Request>
