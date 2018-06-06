@@ -6,6 +6,7 @@
 package xacml;
 
 import com.sun.xacml.ConfigurationStore;
+import com.sun.xacml.EvaluationCtx;
 import com.sun.xacml.Indenter;
 import com.sun.xacml.PDP;
 import com.sun.xacml.PDPConfig;
@@ -28,6 +29,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  *
@@ -37,8 +42,8 @@ public class Xacml {
     
     private PDP pdp = null;
     
-    public Xacml() throws Exception{
-        ConfigurationStore store = new ConfigurationStore(new File("src/config/config_rbac.xml"));
+    public Xacml(String configFilePath) throws Exception{
+        ConfigurationStore store = new ConfigurationStore(new File(configFilePath));
 
         // use the default factories from the configuration
         store.useDefaultFactories();
@@ -51,7 +56,6 @@ public class Xacml {
         FilePolicyModule filePolicyModule = new FilePolicyModule();
         for (int i = 0; i < policyFiles.length; i++)
             filePolicyModule.addPolicy(policyFiles[i]);
-
         // next, setup the PolicyFinder that this PDP will use
         PolicyFinder policyFinder = new PolicyFinder();
         Set policyModules = new HashSet();
@@ -63,7 +67,6 @@ public class Xacml {
         // support a basic implementation)
         CurrentEnvModule envAttributeModule = new CurrentEnvModule();
         SelectorModule selectorAttributeModule = new SelectorModule();
-
         // Setup the AttributeFinder just like we setup the PolicyFinder. Note
         // that unlike with the policy finder, the order matters here. See the
         // the javadocs for more details.
@@ -88,12 +91,10 @@ public class Xacml {
         pdp = new PDP(new PDPConfig(attributeFinder, policyFinder, null));
     }
     
-    public ResponseCtx evaluate(String requestFile) throws IOException, ParsingException
+    public ResponseCtx evaluate(String requestFile) throws IOException, ParsingException, Exception
     {
         // setup the request based on the file
-        RequestCtx request =
-            RequestCtx.getInstance(new FileInputStream(requestFile));
-
+        RequestCtx request = RequestCtx.getInstance((Node)(getXMLDocument(requestFile).getDocumentElement()));
         // evaluate the request
         return pdp.evaluate(request);
     }
@@ -102,8 +103,8 @@ public class Xacml {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception{
-        if (args.length < 2) {
-            System.out.println("Usage: -config <request>");
+        if (args.length < 3) {
+            System.out.println("Usage: -config <config> <request>");
             System.out.println("       <request> <policy> [policies]");
             System.exit(1);
         }
@@ -112,23 +113,41 @@ public class Xacml {
         String requestFile = null;
         
         if (args[0].equals("-config")) {
-            requestFile = args[1];
-            simplePDP = new Xacml();
+            simplePDP = new Xacml(args[1]);
+            requestFile = args[2];
+            ResponseCtx response = simplePDP.evaluate(requestFile);
+            response.encode(System.out, new Indenter());
+            
         } else {
             requestFile = args[0];
-            String[] policyFiles = new String[args.length - 1];
             
-            for (int i = 1; i < args.length; i++)
-                policyFiles[i-1] = args[i];
-
-            simplePDP = new Xacml(policyFiles);
+            for (int i = 1; i < args.length; i++) {
+                simplePDP = new Xacml(new String[] { args[i] });
+                ResponseCtx response = simplePDP.evaluate(requestFile);
+                response.encode(System.out, new Indenter());
+            }
         }
-
-        // evaluate the request
-        ResponseCtx response = simplePDP.evaluate(requestFile);
-
-        // for this sample program, we'll just print out the response
-        response.encode(System.out, new Indenter());
     }
     
+    private static List<String> getFiles(String directoryLocation)
+    {
+        List<String> filesPaths = new ArrayList<String>();       
+        File[] files = new File(directoryLocation).listFiles();
+        for (File file : files) {
+            if (file.isFile()) {
+                filesPaths.add(file.getAbsolutePath());
+            }
+        }       
+        return filesPaths;
+    }
+    
+    private static Document getXMLDocument(String file) throws Exception {
+        File xmlFile = new File(file);
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        dbFactory.setNamespaceAware(true);
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(xmlFile);
+        return doc;
+    }
 }
+

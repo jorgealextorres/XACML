@@ -7,11 +7,12 @@
 	<attributeFinderModule class="com.sun.xacml.finder.impl.CurrentEnvModule"/>
 	<attributeFinderModule class="com.sun.xacml.finder.impl.SelectorModule"/>
 	<policyFinderModule class="com.sun.xacml.finder.impl.FilePolicyModule">
-		<list>		  
-		 <!--<string>src/policies/XACMLPolicy1.xml</string>-->
-                 <string>src/policies/XACMLPolicy2.xml</string>
-                 <!--<string>src/policies/XACMLPolicy3.xml</string>-->
-		<!--		 
+		<list>	
+		<!--  Replace with your local absolute or reletive path to policies	-->
+		 <string>C:\\Users\\Pau\\Documents\\Universitat\\Master\\ISDCM\\Entrega6\\isdcm_sun\\XACML\\src\\policies\\XACMLPolicy1.xml</string>
+         <!--	<string>C:\\Users\\Pau\\Documents\\Universitat\\Master\\ISDCM\\Entrega6\\isdcm_sun\\XACML\\src\\policies\\XACMLPolicy2.xml</string>
+         <string>C:\\Users\\Pau\\Documents\\Universitat\\Master\\ISDCM\\Entrega6\\isdcm_sun\\XACML\\src\\policies\\XACMLPolicy3.xml</string>
+			 
 			Sample policies
 		 <string>support/policy/XACMLPolicy2.xml</string>
 		 <string>support/policy/XACMLPolicy3.xml</string> 		-->
